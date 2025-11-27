@@ -1,6 +1,8 @@
 all parts needed for a metal roof 590
 
+财富=本金x 杠杆效率x时间-代价损耗
 
+1 本金要
 
 
 
