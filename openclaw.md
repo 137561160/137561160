@@ -166,7 +166,30 @@ openclaw gateway
 openclaw agent --agent main --message "你好，测试阿里云百炼模型"
 
 
+终端 1：只启动代理服务器（核心，必须保持运行）
+bash
+运行
+# 执行这行命令后，终端会显示 "阿里云百炼代理服务器启动：http://127.0.0.1:3000"
+# ✅ 不要按任何键、不要关闭这个终端！
+node ~/aliyun-proxy.js
 
+终端 2：只启动 Gateway（忽略 UI 警告）
+bash
+运行
+# 先杀旧进程，再启动 Gateway
+pkill -9 -f "openclaw gateway"
+openclaw gateway
+
+方案 2：获取原始 token（如需保留认证）
+如果想保留 token 认证，执行以下命令查看未脱敏的 token：
+bash
+运行
+# 直接读取配置文件，获取原始 token
+cat ~/.openclaw/openclaw.json | grep -E '"token":\s*"[^"]+"'
+
+复制这串 abcdef1234567890xyz...，然后打开带 token 的链接：
+plaintext
+http://127.0.0.1:18789/#token=abcdef1234567890xyz...
 
 
 
