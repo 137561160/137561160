@@ -94,102 +94,64 @@ openclaw gateway stop
 
 --------------------------------------------------------------------------------------
 二、核心方案：自定义代理转发-------------API 
-cat > ~/aliyun-proxy.js << EOF
-const http = require('http');
-const https = require('https');
-const url = require('url');
-
-// 你的有效阿里云 API Key
-const API_KEY = 'sk-88d28af8d11a487XXX3251725f6e';
-// 阿里云百炼兼容接口
-const TARGET_URL = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
-
-// 创建代理服务器
-const server = http.createServer((req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  const targetPath = parsedUrl.pathname;
-  const targetFullUrl = TARGET_URL + targetPath;
-
-  // 构建转发请求
-  const options = url.parse(targetFullUrl);
-  options.method = req.method;
-  options.headers = {
-    ...req.headers,
-    'Authorization': \`Bearer \${API_KEY}\`,
-    'Content-Type': 'application/json',
-    'Host': 'dashscope.aliyuncs.com'
-  };
-
-  // 转发请求到阿里云
-  const proxyReq = https.request(options, (proxyRes) => {
-    res.writeHead(proxyRes.statusCode, proxyRes.headers);
-    proxyRes.pipe(res);
-  });
-
-  // 处理请求体
-  req.pipe(proxyReq);
-
-  // 错误处理
-  proxyReq.on('error', (err) => {
-    res.writeHead(500);
-    res.end(JSON.stringify({ error: err.message }));
-  });
-});
-
-// 代理服务器监听 3000 端口
-server.listen(3000, '0.0.0.0', () => {
-  console.log('阿里云百炼代理服务器启动：http://127.0.0.1:3000');
-});
-EOF
-
-步骤 2：启动代理服务器
-bash
-运行
-# 启动代理（保持这个终端打开）
-node ~/aliyun-proxy.js
-
-步骤 3：配置 OpenClaw 指向本地代理
-bash
-运行
-# 1. 设置 qwen 节点指向本地代理
-openclaw config set models.providers.qwen.baseUrl "http://127.0.0.1:3000"
-openclaw config set models.providers.qwen.apiKey "dummy-key"  # 代理会覆盖，随便填
-openclaw config set agents.defaults.model.primary "qwen/qwen-turbo"
-
-# 2. 禁用 qwen-portal 插件
-openclaw config set plugins.entries.qwen-portal-auth.enabled false
-
-# 新开终端，启动 Gateway
-openclaw gateway
-
-# 再新开终端，调用模型（必成功）
-openclaw agent --agent main --message "你好，测试阿里云百炼模型"
+安装好后，不要选ai，直接》
+mkdir -p ~/.openclaw
+nano ~/.openclaw/openclaw.json
+把下面的写进去就可以了。就可以用api了。
 
 
-终端 1：只启动代理服务器（核心，必须保持运行）
-bash
-运行
-# 执行这行命令后，终端会显示 "阿里云百炼代理服务器启动：http://127.0.0.1:3000"
-# ✅ 不要按任何键、不要关闭这个终端！
-node ~/aliyun-proxy.js
+{
+  "meta": {
+    "lastTouchedVersion": "2026.2.1",
+    "lastTouchedAt": "2026-02-03T08:20:00.000Z"
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "test123"
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "bailian": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "sk-b2e0454555e94c7eaff525f02156d540d",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qwen3-max-2026-01-23",
+            "name": "qwen3-max-2026-01-23",
+            "reasoning": false,
+            "input": ["text"],
+            "contextWindow": 262144,
+            "maxTokens": 65536
+          },
+          {
+            "id": "qwen3-coder-plus",
+            "name": "qwen3-coder-plus",
+            "reasoning": false,
+            "input": ["text"],
+            "contextWindow": 131072,
+            "maxTokens": 32768
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "bailian/qwen3-max-2026-01-23"
+      }
+    }
+  }
+}
+启动用：openclaw gateway run
 
-终端 2：只启动 Gateway（忽略 UI 警告）
-bash
-运行
-# 先杀旧进程，再启动 Gateway
-pkill -9 -f "openclaw gateway"
-openclaw gateway
+网页连接要token: http://127.0.0.1:18789/?token=xxxxxx
 
-方案 2：获取原始 token（如需保留认证）
-如果想保留 token 认证，执行以下命令查看未脱敏的 token：
-bash
-运行
-# 直接读取配置文件，获取原始 token
-cat ~/.openclaw/openclaw.json | grep -E '"token":\s*"[^"]+"'
-
-复制这串 abcdef1234567890xyz...，然后打开带 token 的链接：
-plaintext
-http://127.0.0.1:18789/#token=abcdef1234567890xyz...
 
 
 
