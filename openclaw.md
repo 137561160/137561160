@@ -152,6 +152,45 @@ nano ~/.openclaw/openclaw.json
 
 网页连接要token: http://127.0.0.1:18789/?token=xxxxxx
 
+#用本地模型
+--------------------------------------------------------------------------------------------------------------
+安装 Ollama: 确保 Windows 上已安装并运行了 Ollama。
+拉取模型: 在 Windows PowerShell 中运行 ollama pull qwen3.5:4b (或你需要的其他模型)。
+获取 IP: 确认 Windows 的 WSL2 虚拟网卡 IP (通常是 172.31.x.x)。
+你之前确认的地址是：172.31.176.1
+🛠️ 配置步骤 (WSL2 / Ubuntu 端)
+1. 启动配置向导
+在 Ubuntu 终端运行：
+bash
 
+编辑
+
+
+
+openclaw configure --section model
+2. 交互式填空指南
+按照以下顺序输入（括号内为操作说明）：
+表格
+提示问题	你的操作/输入	说明
+Where will the Gateway run?	直接 回车	选择默认 Local (this machine)
+Model/auth provider	直接 回车	选择默认 Custom Provider
+API Base URL	输入 http://172.31.176.1:11434/v1	关键: 必须是 Windows 的 IP，不能用 127.0.0.1
+How do you want to provide this API key?	直接 回车	选择 Paste API key now
+API Key	输入 ollama	Ollama 默认不需要复杂密钥，填任意非空字符串即可
+Endpoint compatibility	直接 回车	选择 OpenAI-compatible (Ollama 兼容此格式)
+Model ID	输入 qwen3.5:4b	必须与 Windows 上拉取的模型名称完全一致
+Endpoint ID	直接 回车	接受自动生成的 ID (如 custom-172...)
+3. 验证与完成
+看到 Verification successful 表示连接测试通过。
+看到 Configuration saved! 表示配置已保存。
+🚀 启动服务
+配置完成后，在终端运行：
+bash
+
+编辑
+
+
+
+openclaw gateway
 
 
