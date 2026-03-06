@@ -9,3 +9,6 @@ chmod 644 ~/.openclaw/openclaw.json
 
 # 查看WSL中最新的配置文件内容（确认是编辑后的版本）
 cat ~/.openclaw/openclaw.json
+
+# 取虚拟机IP：
+cat /etc/resolv.conf
