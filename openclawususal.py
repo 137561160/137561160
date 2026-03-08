@@ -12,3 +12,8 @@ cat ~/.openclaw/openclaw.json
 
 # 取虚拟机IP：
 cat /etc/resolv.conf
+
+
+访问端口转发，是在windows里输入命令：
+$wslIp = wsl hostname -I
+netsh interface portproxy add v4tov4 listenport=8000 connectaddress=$wslIp connectport=8000
